@@ -12,27 +12,17 @@ class FavoriteSwitcher {
     return instance;
   }
 
-  bool isFavorite = false;
+  void _favoriteEdit(Task task, bool isFavorite) async {
+    final newTask = task.copyWith(isFavorite: isFavorite);
+    TaskRepository.instance.editTask(newTask);
+    await SharedPreferencesRepository.instance.editTask(newTask);
+  }
 
-  void pressedFavorite(String title, String description, int id) async {
-    if (!isFavorite) {
-      isFavorite = true;
-      await SharedPreferencesRepository.instance
-          .saveButtonStateFavorite(isFavorite);
-      final task = TaskRepository.instance.addToFavoriteTask(
-        Task(
-          title: title,
-          description: description,
-          id: id,
-        ),
-      );
-      await SharedPreferencesRepository.instance.saveFavoriteTask(task);
-    } else {
-      isFavorite = false;
-      await SharedPreferencesRepository.instance
-          .saveButtonStateFavorite(isFavorite);
-      await SharedPreferencesRepository.instance.deleteFavoriteTask(id);
-      TaskRepository.instance.deleteFavoriteTask(id);
-    }
+  void addFavorite(Task task) async {
+    _favoriteEdit(task, true);
+  }
+
+  void deleteFavorite(Task task) async {
+    _favoriteEdit(task, false);
   }
 }

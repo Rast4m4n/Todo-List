@@ -8,20 +8,18 @@ import 'package:todo_list/navigation/app_navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FavoriteSwitcher();
   TaskRepository();
   SharedPreferencesRepository();
   ThemeSwitcherNotifier();
-  TaskRepository.instance.loadTasks(
+
+  TaskRepository.instance.addTasks(
     await SharedPreferencesRepository.instance.loadTasks(),
   );
-  TaskRepository.instance.loadFavoriteTasks(
-    await SharedPreferencesRepository.instance.loadFavoriteTask(),
-  );
+
   ThemeSwitcherNotifier.isDark =
       await SharedPreferencesRepository.instance.loadTheme();
-  FavoriteSwitcher();
-  FavoriteSwitcher.instance.isFavorite =
-      await SharedPreferencesRepository.instance.loadButtonStateFavorite();
+
   final navigation = AppNavigator();
   runApp(MyApp(navigator: navigation));
 }

@@ -14,28 +14,6 @@ class TaskRepository {
   }
 
   final List<Task> _tasks = [];
-  final List<Task> _favoriteTasks = [];
-
-  Future<List<Task>> getTasks() async {
-    Future.delayed(const Duration(seconds: 1));
-    return _tasks;
-  }
-
-  Future<List<Task>> getFavoriteTasks() async {
-    Future.delayed(const Duration(seconds: 1));
-    return _favoriteTasks;
-  }
-
-  void loadTasks(List<Task> tasks) => _tasks.addAll(tasks);
-
-  void loadFavoriteTasks(List<Task> tasks) {
-    _favoriteTasks.addAll(tasks);
-  }
-
-  Task addToFavoriteTask(Task task) {
-    _favoriteTasks.add(task);
-    return task;
-  }
 
   Task createTask({
     required String title,
@@ -56,9 +34,12 @@ class TaskRepository {
     _tasks.removeAt(index);
   }
 
-  void deleteFavoriteTask(int index) {
-    _favoriteTasks.removeWhere((element) => element.id == index);
+  Future<List<Task>> getTasks() async {
+    await Future.delayed(const Duration(seconds: 1));
+    return _tasks;
   }
+
+  void addTasks(List<Task> tasks) => _tasks.addAll(tasks);
 
   void editTask(Task task) {
     final index = _tasks.indexWhere((element) => element.id == task.id);

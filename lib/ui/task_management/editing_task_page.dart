@@ -27,7 +27,7 @@ class _EditingTaskPageState extends State<EditingTaskPage> {
         description: _descriptionController.text,
         id: widget.task.id);
     TaskRepository.instance.editTask(task);
-    await SharedPreferencesRepository.instance.editTasks(task).then((value) =>
+    await SharedPreferencesRepository.instance.editTask(task).then((value) =>
         Navigator.of(context).popAndPushNamed(NavigationRouteNames.taskRoute));
   }
 

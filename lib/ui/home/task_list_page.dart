@@ -110,6 +110,10 @@ class _TasksPageState extends State<TasksPage> with RouteAware {
     setState(() {});
   }
 
+  void _update() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Task>>(
@@ -129,7 +133,7 @@ class _TasksPageState extends State<TasksPage> with RouteAware {
                 },
                 onResize: () {},
                 background: Container(color: Colors.red),
-                child: TaskCard(task: tasks[index]),
+                child: TaskCard(task: tasks[index], onFavorite: _update),
               );
             },
             itemCount: tasks.length,
@@ -142,8 +146,10 @@ class _TasksPageState extends State<TasksPage> with RouteAware {
 }
 
 class TaskCard extends StatefulWidget {
-  const TaskCard({Key? key, required this.task}) : super(key: key);
+  const TaskCard({Key? key, required this.task, required this.onFavorite})
+      : super(key: key);
   final Task task;
+  final VoidCallback onFavorite;
   @override
   State<TaskCard> createState() => _TaskCardState();
 }
@@ -177,15 +183,14 @@ class _TaskCardState extends State<TaskCard> {
           ),
           trailing: IconButton(
             onPressed: () {
-              FavoriteSwitcher.instance.pressedFavorite(
-                  widget.task.title, widget.task.description, widget.task.id);
-              setState(() {});
+              widget.task.isFavorite
+                  ? FavoriteSwitcher.instance.deleteFavorite(widget.task)
+                  : FavoriteSwitcher.instance.addFavorite(widget.task);
+              widget.onFavorite();
             },
             icon: Icon(
-              FavoriteSwitcher.instance.isFavorite
-                  ? Icons.favorite
-                  : Icons.favorite_outline,
-              color: FavoriteSwitcher.instance.isFavorite ? Colors.red : null,
+              widget.task.isFavorite ? Icons.favorite : Icons.favorite_outline,
+              color: widget.task.isFavorite ? Colors.red : null,
             ),
             splashRadius: 0.1,
           ),

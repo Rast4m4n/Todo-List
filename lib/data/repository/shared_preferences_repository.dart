@@ -69,7 +69,7 @@ class SharedPreferencesRepository {
     await saveAll(tasks);
   }
 
-  Future<void> editTasks(Task task) async {
+  Future<void> editTask(Task task) async {
     final tasks = await loadTasks();
     final index = tasks.indexWhere((element) => element.id == task.id);
     tasks[index] = task;
@@ -83,15 +83,5 @@ class SharedPreferencesRepository {
 
   Future<bool> loadTheme() async {
     return (await pref).getBool('isDark') ?? false;
-  }
-
-  //----------------Сохранение и загрузка избранных задача---------------------
-
-  Future<void> saveButtonStateFavorite(bool favorite) async {
-    await (await pref).setBool('isFavorite', favorite);
-  }
-
-  Future<bool> loadButtonStateFavorite() async {
-    return (await pref).getBool('isFavorite') ?? false;
   }
 }

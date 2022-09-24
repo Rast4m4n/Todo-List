@@ -22,10 +22,11 @@ class _FavoriteTasksPageState extends State<FavoriteTasksPage> {
             .then((value) => setState(() {}));
       },
       child: FutureBuilder<List<Task>>(
-        future: TaskRepository.instance.getFavoriteTasks(),
+        future: TaskRepository.instance.getTasks(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final tasks = snapshot.data!;
+            final tasks =
+                snapshot.data!.where((element) => element.isFavorite).toList();
             return ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               itemBuilder: (context, index) {
@@ -33,8 +34,8 @@ class _FavoriteTasksPageState extends State<FavoriteTasksPage> {
                   key: UniqueKey(),
                   onDismissed: (direction) async {
                     await SharedPreferencesRepository.instance
-                        .deleteFavoriteTask(tasks[index].id);
-                    TaskRepository.instance.deleteFavoriteTask(tasks[index].id);
+                        .deleteTask(tasks[index].id);
+                    TaskRepository.instance.deleteTask(tasks[index].id);
                     setState(() {});
                   },
                   background: Container(color: Colors.red),
