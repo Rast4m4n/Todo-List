@@ -28,57 +28,56 @@ class _TasksListPageState extends State<TasksListPage> {
   Widget build(BuildContext context) {
     return ViewModelInh(
       model: model,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).backgroundColor,
-        appBar: AppBar(
-          title: Text(_selectedTab == 0 ? 'Список задач' : 'Избранные задачи'),
-          actions: [
-            IconButton(
-                tooltip: ThemeSwitcherNotifier.isDark
-                    ? 'Тёмный режим'
-                    : 'Светлый режим',
-                onPressed: ThemeSwitcherNotifier.instance.switchTheme,
-                icon: ThemeSwitcherNotifier.isDark
-                    ? const Icon(Icons.dark_mode_outlined)
-                    : const Icon(Icons.light_mode),
-                splashRadius: 20,
-                highlightColor: ThemeSwitcherNotifier.isDark
-                    ? const Color.fromARGB(255, 57, 57, 57)
-                    : Colors.blueGrey),
-            const SizedBox(width: 8),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => ViewModelInh.of(context)?.model.enterAddTaskPage(),
-          child: const Icon(Icons.add),
-        ),
-        body: IndexedStack(
-          index: _selectedTab,
-          children: const [
-            TasksPage(),
-            FavoriteTasksPage(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedTab,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Задачи',
-              tooltip: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
-              label: 'Избранные',
-              tooltip: '',
-            ),
-          ],
-          selectedIconTheme: const IconThemeData(size: 26),
-          unselectedIconTheme: const IconThemeData(size: 20),
-          selectedFontSize: 16,
-          onTap: _currentPage,
-        ),
-      ),
+      child: Builder(builder: (context) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).backgroundColor,
+          appBar: AppBar(
+            title: Text(_selectedTab == 0 ? 'Список задач' : 'Избранные задачи'),
+            actions: [
+              IconButton(
+                  tooltip: ThemeSwitcherNotifier.isDark ? 'Тёмный режим' : 'Светлый режим',
+                  onPressed: ThemeSwitcherNotifier.instance.switchTheme,
+                  icon: ThemeSwitcherNotifier.isDark
+                      ? const Icon(Icons.dark_mode_outlined)
+                      : const Icon(Icons.light_mode),
+                  splashRadius: 20,
+                  highlightColor:
+                      ThemeSwitcherNotifier.isDark ? const Color.fromARGB(255, 57, 57, 57) : Colors.blueGrey),
+              const SizedBox(width: 8),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => ViewModelInh.of(context)?.model.enterAddTaskPage(),
+            child: const Icon(Icons.add),
+          ),
+          body: IndexedStack(
+            index: _selectedTab,
+            children: const [
+              TasksPage(),
+              FavoriteTasksPage(),
+            ],
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedTab,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Задачи',
+                tooltip: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.favorite),
+                label: 'Избранные',
+                tooltip: '',
+              ),
+            ],
+            selectedIconTheme: const IconThemeData(size: 26),
+            unselectedIconTheme: const IconThemeData(size: 20),
+            selectedFontSize: 16,
+            onTap: _currentPage,
+          ),
+        );
+      }),
     );
   }
 }
@@ -121,9 +120,7 @@ class _TasksPageState extends State<TasksPage> with RouteAware {
               return Dismissible(
                 key: UniqueKey(),
                 onDismissed: (direction) async {
-                  ViewModelInh.of(context)
-                      ?.model
-                      .deleteTask(tasks[index].id, index);
+                  ViewModelInh.of(context)?.model.deleteTask(tasks[index].id, index);
                   setState(() {});
                 },
                 background: Container(color: Colors.red),
@@ -156,6 +153,13 @@ class TaskCard extends StatefulWidget {
 }
 
 class _TaskCardState extends State<TaskCard> {
+  ViewModel? vm;
+  @override
+  void didChangeDependencies() {
+    vm = ViewModelInh.of(context)?.model;
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -166,10 +170,8 @@ class _TaskCardState extends State<TaskCard> {
           borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
         child: ListTile(
-          onTap: () =>
-              ViewModelInh.of(context)?.model.enterViewTask(widget.task),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+          onTap: () => vm?.enterViewTask(widget.task),
+          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
           title: Text(widget.task.title),
           subtitle: Text(
             widget.task.description,
@@ -181,15 +183,11 @@ class _TaskCardState extends State<TaskCard> {
             children: [
               IconButton(
                 onPressed: () {
-                  ViewModelInh.of(context)
-                      ?.model
-                      .onFavoritePressed(widget.task);
+                  vm?.onFavoritePressed(widget.task);
                   widget.updateList();
                 },
                 icon: Icon(
-                  widget.task.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_outline,
+                  widget.task.isFavorite ? Icons.favorite : Icons.favorite_outline,
                   color: widget.task.isFavorite ? Colors.red : null,
                 ),
               ),
@@ -201,9 +199,7 @@ class _TaskCardState extends State<TaskCard> {
                       .map(
                         (e) => PopupMenuItem(
                           onTap: () {
-                            ViewModelInh.of(context)
-                                ?.model
-                                .selectPriority(widget.task, e);
+                            vm?.selectPriority(widget.task, e);
                             widget.updateList();
                           },
                           child: ListTile(
