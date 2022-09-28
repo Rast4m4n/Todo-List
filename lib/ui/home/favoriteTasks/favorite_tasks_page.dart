@@ -32,8 +32,7 @@ class _FavoriteTasksPageState extends State<FavoriteTasksPage> {
               itemBuilder: (context, index) {
                 return TaskCard(
                   task: tasks[index],
-                  onFavorite: () => setState(() {}),
-                  onSelectPriority: () => setState(() {}),
+                  updateList: () => setState(() {}),
                 );
               },
               itemCount: tasks.length,
