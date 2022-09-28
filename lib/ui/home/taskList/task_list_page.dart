@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/data/repository/shared_preferences_repository.dart';
 import 'package:todo_list/data/repository/task_repository.dart';
+import 'package:todo_list/domain/enums/priority_enum.dart';
 import 'package:todo_list/domain/models/task.dart';
 import 'package:todo_list/domain/states/favorite_switcher.dart';
 import 'package:todo_list/domain/states/theme_switcher_notifier.dart';
 import 'package:todo_list/navigation/app_navigation.dart';
-import 'package:todo_list/ui/home/favorite_tasks_page.dart';
+import 'package:todo_list/ui/home/favoriteTasks/favorite_tasks_page.dart';
 
 final routeObserver = RouteObserver<ModalRoute<void>>();
 
@@ -92,6 +93,7 @@ class TasksPage extends StatefulWidget {
 }
 
 class _TasksPageState extends State<TasksPage> with RouteAware {
+  final model = FavoriteSwitcher();
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -110,46 +112,56 @@ class _TasksPageState extends State<TasksPage> with RouteAware {
     setState(() {});
   }
 
-  void _update() {
-    setState(() {});
-  }
+  void _update() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Task>>(
-      future: TaskRepository.instance.getTasks(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final tasks = snapshot.data!;
-          return ListView.builder(
-            itemBuilder: (context, index) {
-              return Dismissible(
-                key: UniqueKey(),
-                onDismissed: (direction) async {
-                  await SharedPreferencesRepository.instance
-                      .deleteTask(tasks[index].id);
-                  TaskRepository.instance.deleteTask(index);
-                  setState(() {});
-                },
-                onResize: () {},
-                background: Container(color: Colors.red),
-                child: TaskCard(task: tasks[index], onFavorite: _update),
-              );
-            },
-            itemCount: tasks.length,
-          );
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
+    return FavoriteSwitcherInh(
+      model: model,
+      child: FutureBuilder<List<Task>>(
+        future: TaskRepository.instance.getTasks(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final tasks = snapshot.data!;
+            return ListView.builder(
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: UniqueKey(),
+                  onDismissed: (direction) async {
+                    await SharedPreferencesRepository.instance
+                        .deleteTask(tasks[index].id);
+                    TaskRepository.instance.deleteTask(index);
+                    setState(() {});
+                  },
+                  onResize: () {},
+                  background: Container(color: Colors.red),
+                  child: TaskCard(
+                    task: tasks[index],
+                    onFavorite: _update,
+                    onSelectPriority: _update,
+                  ),
+                );
+              },
+              itemCount: tasks.length,
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }
 
 class TaskCard extends StatefulWidget {
-  const TaskCard({Key? key, required this.task, required this.onFavorite})
+  const TaskCard(
+      {Key? key,
+      required this.task,
+      required this.onFavorite,
+      required this.onSelectPriority})
       : super(key: key);
   final Task task;
   final VoidCallback onFavorite;
+  final VoidCallback onSelectPriority;
   @override
   State<TaskCard> createState() => _TaskCardState();
 }
@@ -160,6 +172,20 @@ class _TaskCardState extends State<TaskCard> {
       NavigationRouteNames.viewTaskRoute,
       arguments: widget.task,
     );
+  }
+
+  void selectPriority(PriorityEnum selected) async {
+    final newTask = widget.task.copyWith(priority: selected);
+    TaskRepository.instance.editTask(newTask);
+    await SharedPreferencesRepository.instance.editTask(newTask);
+    widget.onSelectPriority();
+  }
+
+  void onFavoritePressed(BuildContext context) {
+    widget.task.isFavorite
+        ? FavoriteSwitcherInh.of(context)?.model!.deleteFavorite(widget.task)
+        : FavoriteSwitcherInh.of(context)?.model!.addFavorite(widget.task);
+    widget.onFavorite();
   }
 
   @override
@@ -181,18 +207,37 @@ class _TaskCardState extends State<TaskCard> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          trailing: IconButton(
-            onPressed: () {
-              widget.task.isFavorite
-                  ? FavoriteSwitcher.instance.deleteFavorite(widget.task)
-                  : FavoriteSwitcher.instance.addFavorite(widget.task);
-              widget.onFavorite();
-            },
-            icon: Icon(
-              widget.task.isFavorite ? Icons.favorite : Icons.favorite_outline,
-              color: widget.task.isFavorite ? Colors.red : null,
-            ),
-            splashRadius: 0.1,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: () => onFavoritePressed(context),
+                icon: Icon(
+                  widget.task.isFavorite
+                      ? Icons.favorite
+                      : Icons.favorite_outline,
+                  color: widget.task.isFavorite ? Colors.red : null,
+                ),
+                splashRadius: 0.1,
+              ),
+              PopupMenuButton(
+                tooltip: 'Приоритетность',
+                icon: Icon(Icons.flag, color: widget.task.priority.getColor()),
+                itemBuilder: (BuildContext context) {
+                  return PriorityEnum.values
+                      .map(
+                        (e) => PopupMenuItem(
+                          onTap: () => selectPriority(e),
+                          child: ListTile(
+                            title: Text(e.getName()),
+                            trailing: Icon(Icons.flag, color: e.getColor()),
+                          ),
+                        ),
+                      )
+                      .toList();
+                },
+              ),
+            ],
           ),
         ),
       ),

@@ -23,33 +23,6 @@ class SharedPreferencesRepository {
     await (await pref).setString('tasks', tasksJson);
   }
 
-  Future<void> saveFavoriteTask(Task task) async {
-    final favoriteTasks = await loadFavoriteTask();
-    favoriteTasks.add(task);
-    favoriteTasks.map((e) => e.toJson()).toList();
-    final favoriteTaskJson = jsonEncode(favoriteTasks);
-    await (await pref).setString('favoriteTasks', favoriteTaskJson);
-  }
-
-  Future<List<Task>> loadFavoriteTask() async {
-    final favoriteTasks = (await pref).getString('favoriteTasks') ?? '[]';
-    final favoriteTaskJson = jsonDecode(favoriteTasks) as List<dynamic>;
-    return favoriteTaskJson
-        .map((e) => Task.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> saveFavoriteAll(List<Task> tasks) async {
-    final tasksJson = jsonEncode(tasks.map((e) => e.toJson()).toList());
-    await (await pref).setString('favoriteTasks', tasksJson);
-  }
-
-  Future<void> deleteFavoriteTask(int id) async {
-    final tasks = await loadFavoriteTask();
-    tasks.removeWhere((element) => element.id == id);
-    await saveFavoriteAll(tasks);
-  }
-
   Future<List<Task>> loadTasks() async {
     final tasksString = (await pref).getString('tasks') ?? '[]';
     final tasksJson = jsonDecode(tasksString) as List<dynamic>;

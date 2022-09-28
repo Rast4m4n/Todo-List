@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/domain/models/task.dart';
-import 'package:todo_list/ui/home/task_list_page.dart';
+import 'package:todo_list/ui/home/taskList/task_list_page.dart';
 import 'package:todo_list/ui/task_management/add_task_page.dart';
 import 'package:todo_list/ui/task_management/editing_task_page.dart';
 import 'package:todo_list/ui/task_management/view_task.dart';

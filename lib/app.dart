@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/domain/states/theme_switcher_notifier.dart';
 import 'package:todo_list/navigation/app_navigation.dart';
-import 'package:todo_list/ui/home/task_list_page.dart';
+import 'package:todo_list/ui/home/taskList/task_list_page.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key, required this.navigator}) : super(key: key);
