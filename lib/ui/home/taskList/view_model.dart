@@ -17,7 +17,6 @@ class ViewModel {
 
   void _favoriteEdit(Task task, bool isFavorite) async {
     final newTask = task.copyWith(isFavorite: isFavorite);
-    print('debage ${newTask.isFavorite}');
     TaskRepository.instance.editTask(newTask);
     await SharedPreferencesRepository.instance.editTask(newTask);
   }
@@ -59,12 +58,6 @@ class ViewModelInh extends InheritedWidget {
 
   static ViewModelInh? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<ViewModelInh>();
-  }
-
-  static ViewModelInh? read(BuildContext context) {
-    final widget =
-        context.getElementForInheritedWidgetOfExactType<ViewModelInh>()?.widget;
-    return widget is ViewModelInh ? widget : null;
   }
 
   @override
